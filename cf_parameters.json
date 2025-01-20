@@ -1,6 +1,8 @@
 {
 	"Parameters":{
-		"CreatedBy": "AJB",
-		"RepositoryBranch": "dev"
+		"RepositoryBranch": "dev",
+		"PrivateSubnets": "True",
+		"NumberOfAZs": 2,
+		"NATType": "EC2 NAT Instance"
 	}
 }
