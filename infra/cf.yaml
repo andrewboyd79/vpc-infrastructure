@@ -26,7 +26,7 @@ Parameters:
     AllowedValues:
     - "EC2 NAT Instance"
     - "NAT Gateway"
-    Default:  "NAT Gateway"
+    Default:  "EC2 NAT Instance"
     Description:  What type of NAT to use for private instances to communicate with the internet.  A single EC2 instance can be used as a NAT, or you can use the AWS NAT Gateway (managed, scalable, more expensive).  This setting will be IGNORED if you do not build private subnets.
 Conditions:
   BuildPublicB:         !Not [ !Equals [ !Ref NumberOfAZs, 1 ]]  

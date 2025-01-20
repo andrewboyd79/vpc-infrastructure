@@ -1,7 +1,5 @@
 {
 	"Parameters":{
-		"RepositoryBranch": "dev",
-		"PrivateSubnets": "True",
-		"NATType": "EC2 NAT Instance"
+		"RepositoryBranch": "dev"
 	}
 }
