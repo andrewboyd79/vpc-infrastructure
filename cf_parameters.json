@@ -1,6 +1,6 @@
 {
 	"Parameters":{
-		"VPCName": "VPC-infra",
+		"VPCName": "VPC-infrastr",
 		"RepositoryBranch": "dev",
 		"VPCCidrBlock": "10.1.0.0/16",
 		"PubSubACidrBlock": "10.1.10.0/24",
