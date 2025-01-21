@@ -3,6 +3,9 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: VPC Creation CloudFormation Template
 Parameters:
+  VPCName:
+    Description: Name of the VPC and its resources
+    Type: String
   RepositoryBranch:
       Description: Repository Branch
       Type: String
@@ -28,6 +31,27 @@ Parameters:
     - "NAT Gateway"
     Default:  "EC2 NAT Instance"
     Description:  What type of NAT to use for private instances to communicate with the internet.  A single EC2 instance can be used as a NAT, or you can use the AWS NAT Gateway (managed, scalable, more expensive).  This setting will be IGNORED if you do not build private subnets.
+  VPCCidrBlock:
+    Type: String
+    Description: VPC CIDR Block range
+  PubSubACidrBlock:
+    Type: String
+    Description: Public Subnet A CIDR Block range
+  PubSubBCidrBlock:
+    Type: String
+    Description: Public Subnet B CIDR Block range
+  PrivSubACidrBlock:
+    Type: String
+    Description: Private Subnet A CIDR Block range
+  PrivSubBCidrBlock:
+    Type: String
+    Description: Private Subnet B CIDR Block range
+  PrivSubCCidrBlock:
+    Type: String
+    Description: Private Subnet C CIDR Block range
+  DestinationCidrBlock:
+    Type: String
+    Description: Destination Cidr Block range
 Conditions:
   BuildPublicB:         !Not [ !Equals [ !Ref NumberOfAZs, 1 ]]  
   BuildPublicC:         !Equals [ !Ref NumberOfAZs, 3 ]  
@@ -49,12 +73,12 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 10.1.0.0/16
+      CidrBlock: !Ref VPCCidrBlock
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags:
       - Key: Name
-        Value: !Sub ${AWS::StackName}-VPC
+        Value: !Sub ${VPCName}-VPC
         
   # Our VPC will need internet access:      
   InternetGateway:
@@ -72,64 +96,64 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.1.10.0/24
+      CidrBlock: !Ref PubSubACidrBlock
       AvailabilityZone: !Select [ 0, !GetAZs ]    # Get the first AZ in the list        
       MapPublicIpOnLaunch:  true
       Tags:
       - Key: Name
-        Value: !Sub ${AWS::StackName}-Public-A
+        Value: !Sub ${VPCName}-Public-A
   PublicSubnetB:
     Type: AWS::EC2::Subnet
     Condition: BuildPublicB
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.1.20.0/24
+      CidrBlock: !Ref PubSubBCidrBlock
       AvailabilityZone: !Select [ 1, !GetAZs ]    # Get the second AZ in the list  
       MapPublicIpOnLaunch:  true
       Tags:
       - Key: Name
-        Value: !Sub ${AWS::StackName}-Public-B
+        Value: !Sub ${VPCName}-Public-B
   PublicSubnetC:
     Type: AWS::EC2::Subnet
     Condition: BuildPublicC
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.1.30.0/24
+      CidrBlock: !Ref PubSubCCidrBlock
       AvailabilityZone: !Select [ 2, !GetAZs ]    # Get the third AZ in the list  
       MapPublicIpOnLaunch:  true
       Tags:
       - Key: Name
-        Value: !Sub ${AWS::StackName}-Public-C
+        Value: !Sub ${VPCName}-Public-C
   PrivateSubnetA:
     Type: AWS::EC2::Subnet
     Condition: BuildPrivateA
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.1.50.0/24
+      CidrBlock: !Ref PrivSubACidrBlock
       AvailabilityZone: !Select [ 0, !GetAZs ]    # Get the first AZ in the list  
       Tags:
       - Key: Name
-        Value: !Sub ${AWS::StackName}-Private-A
+        Value: !Sub ${VPCName}-Private-A
   PrivateSubnetB:
     Type: AWS::EC2::Subnet
     Condition: BuildPrivateB
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.1.60.0/24
+      CidrBlock: !Ref PrivSubBCidrBlock
       AvailabilityZone: !Select [ 1, !GetAZs ]    # Get the second AZ in the list  
       Tags:
       - Key: Name
-        Value: !Sub ${AWS::StackName}-Private-B
+        Value: !Sub ${VPCName}-Private-B
   PrivateSubnetC:
     Type: AWS::EC2::Subnet
     Condition: BuildPrivateC
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.1.70.0/24
+      CidrBlock: !Ref PrivSubCCidrBlock
       AvailabilityZone: !Select [ 2, !GetAZs ]    # Get the third AZ in the list  
       Tags:
       - Key: Name
-        Value: !Sub ${AWS::StackName}-Private-C
+        Value: !Sub ${VPCName}-Private-C
         
   # Some route tables for our subnets:        
   PublicRouteTable:
@@ -144,7 +168,7 @@ Resources:
     DependsOn: AttachGateway
     Properties:
       RouteTableId: !Ref PublicRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
+      DestinationCidrBlock: !Ref DestinationCidrBlock
       GatewayId: !Ref InternetGateway
       
   # Here is a private route table:
@@ -161,7 +185,7 @@ Resources:
     Condition: BuildPrivateSubnets
     Properties:
       RouteTableId: !Ref PrivateRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
+      DestinationCidrBlock: !Ref DestinationCidrBlock
       # If we are using a NAT Instance, route traffic through the NAT Instance:
       InstanceId:   !If [ BuildNATInstance, !Ref NATInstance, !Ref "AWS::NoValue" ]
       # Otherwise if we are using a NAT Gateway, route traffic through the NAT Gateway:
@@ -213,7 +237,7 @@ Resources:
     Condition: BuildNATInstance
     DependsOn: AttachGateway
     Properties:
-      GroupName: !Sub NATSecurityGroup-${AWS::StackName}
+      GroupName: !Sub NATSecurityGroup-${VPCName}
       GroupDescription: Enable internal access to the NAT device
       VpcId: !Ref VPC
       SecurityGroupIngress:
@@ -248,7 +272,7 @@ Resources:
       SourceDestCheck: false                                          # NATs don't work if EC2 tries the match source addresses with destinations.
       Tags:
       - Key: Name
-        Value: !Sub NAT-${AWS::StackName}
+        Value: !Sub NAT-${VPCName}
       UserData:      #  This code is NAT code.  Look at how the last line signals the wait condition:
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -279,7 +303,7 @@ Resources:
       SubnetId: !Ref PublicSubnetA
       Tags: 
       - Key: Name
-        Value: !Sub NAT-${AWS::StackName}
+        Value: !Sub NAT-${VPCName}
   ElasticIPAddress:
     Type: AWS::EC2::EIP
     Condition: BuildNATGateway
@@ -292,39 +316,39 @@ Outputs:
     Description: VPC of the base network
     Value: !Ref VPC
     Export:
-      Name: !Sub ${AWS::StackName}-VPC
+      Name: !Sub ${VPCName}-VPC
   PublicSubnetA:
     Description: First Public Subnet
     Value: !Ref PublicSubnetA
     Export:
-      Name: !Sub ${AWS::StackName}-PublicSubnetA
+      Name: !Sub ${VPCName}-PublicSubnetA
   PublicSubnetB:
     Description: Second Public Subnet
     Condition: BuildPublicB
     Value: !Ref PublicSubnetB
     Export:
-      Name: !Sub ${AWS::StackName}-PublicSubnetB
+      Name: !Sub ${VPCName}-PublicSubnetB
   PublicSubnetC:
     Description: Third Public Subnet
     Condition: BuildPublicC
     Value: !Ref PublicSubnetC
     Export:
-      Name: !Sub ${AWS::StackName}-PublicSubnetC
+      Name: !Sub ${VPCName}-PublicSubnetC
   PrivateSubnetA:
     Condition: BuildPrivateSubnets
     Description: First Private Subnet
     Value: !Ref PrivateSubnetA
     Export:
-      Name: !Sub ${AWS::StackName}-PrivateSubnetA
+      Name: !Sub ${VPCName}-PrivateSubnetA
   PrivateSubnetB:
     Condition: BuildPrivateB
     Description: Second Private Subnet
     Value: !Ref PrivateSubnetB
     Export:
-      Name: !Sub ${AWS::StackName}-PrivateSubnetB
+      Name: !Sub ${VPCName}-PrivateSubnetB
   PrivateSubnetC:
     Condition: BuildPrivateC
     Description: Third Private Subnet
     Value: !Ref PrivateSubnetC
     Export:
-      Name: !Sub ${AWS::StackName}-PrivateSubnetC
+      Name: !Sub ${VPCName}-PrivateSubnetC
