@@ -40,6 +40,9 @@ Parameters:
   PubSubBCidrBlock:
     Type: String
     Description: Public Subnet B CIDR Block range
+  PubSubCCidrBlock:
+    Type: String
+    Description: Public Subnet C CIDR Block range
   PrivSubACidrBlock:
     Type: String
     Description: Private Subnet A CIDR Block range
