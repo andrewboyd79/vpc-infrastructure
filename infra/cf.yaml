@@ -52,9 +52,7 @@ Conditions:
   BuildPrivateA:        !Equals [ !Ref PrivateSubnets, True ]       # Can't determine how to build a condition from a separate single condition
   BuildPrivateB:        !And [ Condition: BuildPrivateSubnets, Condition: BuildPublicB ]
   BuildPrivateC:        !And [ Condition: BuildPrivateSubnets, Condition: BuildPublicC ]
-  
-Mappings:
-  
+    
 Resources:
   # First, a VPC:
   VPC:
