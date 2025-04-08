@@ -3,6 +3,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: VPC Creation CloudFormation Template
 Parameters:
+  RepositoryBranch:
+    Type: String
   PrivateSubnets:
     Type: String
     AllowedValues: 
