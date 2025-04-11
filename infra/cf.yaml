@@ -21,28 +21,36 @@ Parameters:
     Default: 2
     Description:  How many Availability Zones do you wish to utilize?
   VPCCidrBlock:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /vpc-infrastructure/VPCCidrBlock
     Description: VPC CIDR Block range
   PubSubACidrBlock:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /vpc-infrastructure/PubSubACidrBlock
     Description: Public Subnet A CIDR Block range
   PubSubBCidrBlock:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /vpc-infrastructure/PubSubBCidrBlock
     Description: Public Subnet B CIDR Block range
   PubSubCCidrBlock:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /vpc-infrastructure/PubSubCCidrBlock
     Description: Public Subnet C CIDR Block range
   PrivSubACidrBlock:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /vpc-infrastructure/PrivSubACidrBlock
     Description: Private Subnet A CIDR Block range
   PrivSubBCidrBlock:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /vpc-infrastructure/PrivSubBCidrBlock
     Description: Private Subnet B CIDR Block range
   PrivSubCCidrBlock:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /vpc-infrastructure/PrivSubCCidrBlock
     Description: Private Subnet C CIDR Block range
   DestinationCidrBlock:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /vpc-infrastructure/DestinationCidrBlock
     Description: Destination Cidr Block range
 
 Conditions:
