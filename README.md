@@ -13,4 +13,4 @@ CloudFormation templates should be committed to the following branches:
 
 The CloudFormation template code should be stored in the 'infra' folder in the 'cf.yaml. file; parameters can be stored in the cf_parameters.json file
 
-To deploy the resources use the 'create_infra.sh' script stored in the 'cloudformation' directory of the Aws_account_tools repository
+To deploy the resources use the 'create_infra.sh' script stored in the 'cloudformation' directory of the Aws_account_tools repository; the script should be executed using Infrastructure account administrator access credentials.
